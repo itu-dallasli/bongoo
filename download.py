@@ -6,9 +6,34 @@
 
 import sys
 import os
+import re
 import shutil
 import argparse
 import yt_dlp
+
+
+# only allow real youtube URLs — blocks command injection via crafted strings
+ALLOWED_URL = re.compile(
+    r'^https?://(www\.)?(youtube\.com|youtu\.be|music\.youtube\.com)/.+$'
+)
+
+
+def validate_url(url):
+    """Reject anything that isn't a YouTube URL."""
+    if not ALLOWED_URL.match(url):
+        print("Invalid URL. Only YouTube links are accepted.")
+        print("Example: https://www.youtube.com/watch?v=VIDEO_ID")
+        sys.exit(1)
+    return url
+
+
+def sanitize_path(path):
+    """Block path traversal attacks in output directory."""
+    resolved = os.path.realpath(path)
+    if ".." in path:
+        print("Invalid output path — path traversal not allowed.")
+        sys.exit(1)
+    return resolved
 
 
 def check_ffmpeg():
@@ -21,6 +46,8 @@ def check_ffmpeg():
 
 
 def download(url, output_dir="downloads"):
+    url = validate_url(url)
+    output_dir = sanitize_path(output_dir)
     os.makedirs(output_dir, exist_ok=True)
 
     opts = {

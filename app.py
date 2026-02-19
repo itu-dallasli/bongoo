@@ -6,11 +6,18 @@
 
 import os
 import sys
+import re
 import shutil
 import threading
 import subprocess
 import customtkinter as ctk
 import yt_dlp
+
+
+# only allow real youtube URLs
+ALLOWED_URL = re.compile(
+    r'^https?://(www\.)?(youtube\.com|youtu\.be|music\.youtube\.com)/.+$'
+)
 
 
 class App(ctk.CTk):
@@ -149,7 +156,13 @@ class App(ctk.CTk):
     def start_download(self):
         url = self.url_entry.get().strip()
         if not url:
-            self.set_status("⚠️  Paste a YouTube URL first!", "#e74c3c")
+            self.set_status("Paste a YouTube URL first!", "#e74c3c")
+            return
+
+        # validate URL before it touches anything
+        if not ALLOWED_URL.match(url):
+            self.set_status("Invalid URL — only YouTube links allowed", "#e74c3c")
+            self.write_log("Only youtube.com and youtu.be URLs are accepted.")
             return
 
         if shutil.which("ffmpeg") is None:
@@ -174,7 +187,8 @@ class App(ctk.CTk):
         threading.Thread(target=self.do_download, args=(url,), daemon=True).start()
 
     def do_download(self, url):
-        os.makedirs(self.output_dir, exist_ok=True)
+        output_dir = os.path.realpath(self.output_dir)
+        os.makedirs(output_dir, exist_ok=True)
 
         def on_progress(d):
             if d["status"] == "downloading":
@@ -191,7 +205,7 @@ class App(ctk.CTk):
 
         opts = {
             "format": "bestaudio/best",
-            "outtmpl": os.path.join(self.output_dir, "%(title)s.%(ext)s"),
+            "outtmpl": os.path.join(output_dir, "%(title)s.%(ext)s"),
             "writethumbnail": True,
             "noplaylist": not self.playlist_var.get(),
             "quiet": True,
