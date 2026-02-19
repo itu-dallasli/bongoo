@@ -12,8 +12,8 @@ Download YouTube videos as high-quality **320kbps MP3** files. GUI app + command
 ## Setup
 
 ```bash
-git clone https://github.com/itu-dallasli/mp3downloaderr.git
-cd mp3downloaderr
+git clone https://github.com/itu-dallasli/bongoo.git
+cd bongoo
 pip install -r requirements.txt
 ```
 
