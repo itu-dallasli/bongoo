@@ -24,7 +24,7 @@ class App(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.title("Bongoo — itu-dallasli")
+        self.title("Bongoo")
         self.geometry("540x460")
         self.minsize(460, 400)
 
