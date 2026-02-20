@@ -1,3 +1,9 @@
 yt-dlp
 customtkinter
 pyinstaller
+mutagen
+librosa
+openunmix
+demucs
+torch
+torchaudio
